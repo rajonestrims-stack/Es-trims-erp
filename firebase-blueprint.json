@@ -1,0 +1,640 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user role and business affiliation.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["editor", "viewer"] },
+        "businessId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "businessId"]
+    },
+    "Category": {
+      "title": "Item Category",
+      "description": "Represents a category for inventory items.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the category" },
+        "ownerId": { "type": "string", "description": "UID of the user who owns this category" },
+        "businessId": { "type": "string", "description": "ID of the business this category belongs to" }
+      },
+      "required": ["name", "ownerId", "businessId"]
+    },
+    "Item": {
+      "title": "Inventory Item",
+      "description": "Represents a single product or item in the inventory.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the item" },
+        "sku": { "type": "string", "description": "Stock Keeping Unit (unique identifier)" },
+        "categoryId": { "type": "string", "description": "ID of the category" },
+        "unit": { "type": "string", "description": "Unit of measurement (e.g., Pcs, Kg, Ltr)" },
+        "minStock": { "type": "number", "description": "Minimum stock level for alerts" },
+        "currentStock": { "type": "number", "description": "Current quantity in stock" },
+        "avgCost": { "type": "number", "description": "Average cost per unit" },
+        "ownerId": { "type": "string", "description": "UID of the user who owns this item" },
+        "businessId": { "type": "string", "description": "ID of the business this item belongs to" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" },
+        "status": { "type": "string", "enum": ["active", "pending_delete"] }
+      },
+      "required": ["name", "sku", "unit", "ownerId", "businessId"]
+    },
+    "Transaction": {
+      "title": "Inventory Transaction",
+      "description": "Represents a stock movement (IN, OUT, or PRODUCTION).",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string", "description": "ID of the item being moved" },
+        "type": { "type": "string", "enum": ["IN", "OUT", "PRODUCTION", "EXTRA_REQUISITION"], "description": "Type of transaction" },
+        "quantity": { "type": "number", "description": "Quantity moved" },
+        "price": { "type": "number", "description": "Price per unit at the time of transaction" },
+        "date": { "type": "string", "format": "date-time", "description": "Date of transaction" },
+        "reference": { "type": "string", "description": "Reference number (e.g., Invoice #)" },
+        "notes": { "type": "string", "description": "Optional notes" },
+        "ownerId": { "type": "string", "description": "UID of the user who owns this transaction" },
+        "businessId": { "type": "string", "description": "ID of the business this transaction belongs to" },
+        "status": { "type": "string", "enum": ["active", "pending_delete"] }
+      },
+      "required": ["itemId", "type", "quantity", "price", "date", "ownerId", "businessId"]
+    },
+    "ProductionFormula": {
+      "title": "Production Formula",
+      "description": "Calculation rules for production (pieces per sheet/roll/kg).",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string", "description": "ID of the item" },
+        "piecesPerSheet": { "type": "number", "description": "How many pieces produced per unit of material" },
+        "extraPercent": { "type": "number", "description": "Extra percentage buffer (wastage)" },
+        "businessId": { "type": "string", "description": "ID of the business" },
+        "ownerId": { "type": "string", "description": "UID of the user who owns this formula" }
+      },
+      "required": ["itemId", "piecesPerSheet", "extraPercent", "businessId", "ownerId"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Vendor or supplier details and opening balance.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "openingBalance": { "type": "number" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["name", "openingBalance", "businessId", "ownerId"]
+    },
+    "PurchaseOrder": {
+      "title": "Purchase Order",
+      "description": "Multi-item purchase order records.",
+      "type": "object",
+      "properties": {
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["poNumber", "supplierId", "supplierName", "totalAmount", "businessId", "ownerId"]
+    },
+    "SupplierPayment": {
+      "title": "Supplier Payment",
+      "description": "Payment transactions to suppliers.",
+      "type": "object",
+      "properties": {
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["supplierId", "supplierName", "amount", "paymentMethod", "businessId", "ownerId"]
+    },
+    "UserRolePermission": {
+      "title": "User Role Permission",
+      "description": "Custom role definition and page access permissions.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "businessId": { "type": "string" },
+        "allowedPages": { "type": "array", "items": { "type": "string" } },
+        "canView": { "type": "boolean" },
+        "canCreate": { "type": "boolean" },
+        "canEdit": { "type": "boolean" },
+        "canDelete": { "type": "boolean" }
+      },
+      "required": ["name", "businessId", "allowedPages"]
+    },
+    "ProductDevelopment": {
+      "title": "Product Development Calculation",
+      "description": "Calculations for product sizing, paper UPS yield, and estimated costing history.",
+      "type": "object",
+      "properties": {
+        "calculationNo": { "type": "string" },
+        "productName": { "type": "string" },
+        "productCode": { "type": "string" },
+        "version": { "type": "number" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["calculationNo", "businessId", "ownerId"]
+    },
+    "CustomerMrrReceipt": {
+      "title": "Customer MRR Receipt",
+      "description": "Customer Material Receipt Report acknowledging delivered goods and accepted quantities.",
+      "type": "object",
+      "properties": {
+        "mrrNo": { "type": "string" },
+        "mrrDate": { "type": "string" },
+        "challanId": { "type": "string" },
+        "challanNo": { "type": "string" },
+        "customerName": { "type": "string" },
+        "mrrQty": { "type": "number" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["mrrNo", "mrrDate", "challanNo", "customerName", "mrrQty", "businessId"]
+    },
+    "CustomerBill": {
+      "title": "Customer Bill / Invoice",
+      "description": "Accounts and finance invoice generated from delivery MRRs with quantities in Dozens and USD price.",
+      "type": "object",
+      "properties": {
+        "billNo": { "type": "string" },
+        "billDate": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "totalQtyPcs": { "type": "number" },
+        "totalQtyDoz": { "type": "number" },
+        "totalAmountUSD": { "type": "number" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["billNo", "billDate", "customerId", "customerName", "totalAmountUSD", "businessId"]
+    },
+    "PurchaseRequisition": {
+      "title": "Purchase Requisition",
+      "description": "Procurement purchase requisition for raw materials with previous purchase price lookup, approval workflow, and conversion to purchase orders.",
+      "type": "object",
+      "properties": {
+        "reqNo": { "type": "string" },
+        "date": { "type": "string" },
+        "totalQty": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["reqNo", "date", "totalQty", "totalAmount", "status", "businessId"]
+    },
+    "BankFacilitySanction": {
+      "title": "Bank Facility Sanction",
+      "description": "Master facility limits and interest terms sanctioned by commercial banks.",
+      "type": "object",
+      "properties": {
+        "bankName": { "type": "string" },
+        "facilityNo": { "type": "string" },
+        "sanctionLimit": { "type": "number" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["bankName", "facilityNo", "sanctionLimit", "businessId"]
+    },
+    "BankLoanRecord": {
+      "title": "Bank Loan Record",
+      "description": "Active and historical bank loan liabilities (UPAS, LTR, Term, etc.).",
+      "type": "object",
+      "properties": {
+        "loanNo": { "type": "string" },
+        "loanType": { "type": "string" },
+        "financedAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["loanNo", "loanType", "financedAmount", "status", "businessId"]
+    },
+    "LoanRepaymentRecord": {
+      "title": "Loan Repayment Record",
+      "description": "Repayment settlements applied against bank loans.",
+      "type": "object",
+      "properties": {
+        "repaymentNo": { "type": "string" },
+        "loanId": { "type": "string" },
+        "totalPaid": { "type": "number" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["repaymentNo", "loanId", "totalPaid", "businessId"]
+    },
+    "LoanGlVoucher": {
+      "title": "Loan GL Voucher",
+      "description": "Double-entry general ledger journal vouchers generated for bank loan transactions.",
+      "type": "object",
+      "properties": {
+        "voucherNo": { "type": "string" },
+        "voucherType": { "type": "string" },
+        "totalDebit": { "type": "number" },
+        "totalCredit": { "type": "number" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["voucherNo", "voucherType", "totalDebit", "totalCredit", "businessId"]
+    },
+    "ChallanCorrectionRequest": {
+      "title": "Challan Correction Request",
+      "description": "Requests to correct or rectify issued delivery challans with Super Admin approval.",
+      "type": "object",
+      "properties": {
+        "challanId": { "type": "string" },
+        "challanNo": { "type": "string" },
+        "woNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "reason": { "type": "string" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["challanId", "challanNo", "reason", "status", "businessId"]
+    },
+    "SubContractSubCategory": {
+      "title": "Sub Contract Sub-Category",
+      "description": "Subcontract process sub-categories defining operations and measurement units.",
+      "type": "object",
+      "properties": {
+        "categoryId": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "subCategoryCode": { "type": "string" },
+        "subCategoryName": { "type": "string" },
+        "orderType": { "type": "string" },
+        "defaultUnit": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["categoryId", "subCategoryCode", "subCategoryName", "businessId"]
+    },
+    "SubContractPrice": {
+      "title": "Sub Contract Supplier Price",
+      "description": "Contracted rates per supplier and subcontract sub-category.",
+      "type": "object",
+      "properties": {
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "subCategoryId": { "type": "string" },
+        "contractPrice": { "type": "number" },
+        "unit": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["supplierId", "supplierName", "categoryId", "contractPrice", "unit", "businessId"]
+    },
+    "CompanyMaster": {
+      "title": "Company Master",
+      "description": "Master company profile details, addresses, tax IDs, and signatories.",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string" },
+        "companyCode": { "type": "string" },
+        "legalType": { "type": "string" },
+        "address": { "type": "string" },
+        "factoryAddress": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "binNumber": { "type": "string" },
+        "tinNumber": { "type": "string" },
+        "isDefault": { "type": "boolean" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["companyName", "address", "businessId"]
+    },
+    "BankAccountMaster": {
+      "title": "Bank Account Master",
+      "description": "Master bank accounts with routing, swift codes, and company associations.",
+      "type": "object",
+      "properties": {
+        "bankName": { "type": "string" },
+        "accountName": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "branchName": { "type": "string" },
+        "swiftCode": { "type": "string" },
+        "routingNumber": { "type": "string" },
+        "currency": { "type": "string" },
+        "companyId": { "type": "string" },
+        "companyName": { "type": "string" },
+        "isDefault": { "type": "boolean" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["bankName", "accountNumber", "currency", "businessId"]
+    },
+    "CoaGroup": {
+      "title": "Chart of Accounts Group",
+      "description": "Top-level account group (Asset, Liability, Equity, Income, Expense)",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "nature": { "type": "string", "enum": ["Debit", "Credit"] },
+        "sequence": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["code", "name", "nature", "businessId"]
+    },
+    "CoaCategory": {
+      "title": "Chart of Accounts Category",
+      "description": "Second-tier accounting category (Current Assets, Non-Current Assets, etc.)",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "groupId": { "type": "string" },
+        "groupCode": { "type": "string" },
+        "nature": { "type": "string" },
+        "sequence": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["code", "name", "groupId", "businessId"]
+    },
+    "CoaSubCategory": {
+      "title": "Chart of Accounts Sub Category",
+      "description": "Third-tier accounting sub-category (Cash & Cash Equivalent, Accounts Receivable, etc.)",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "groupId": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "nature": { "type": "string" },
+        "sequence": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["code", "name", "groupId", "categoryId", "businessId"]
+    },
+    "CoaLedger": {
+      "title": "Chart of Accounts Ledger Account",
+      "description": "Final ledger account where direct journal postings occur.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "groupId": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "subCategoryId": { "type": "string" },
+        "accountType": { "type": "string" },
+        "nature": { "type": "string" },
+        "openingBalance": { "type": "number" },
+        "openingBalanceDate": { "type": "string" },
+        "currency": { "type": "string" },
+        "directEntryAllowed": { "type": "boolean" },
+        "controlAccount": { "type": "boolean" },
+        "systemAccount": { "type": "boolean" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["code", "name", "groupId", "categoryId", "subCategoryId", "accountType", "nature", "businessId"]
+    },
+    "JournalEntry": {
+      "title": "Journal Entry Voucher",
+      "description": "Financial journal entry voucher with multi-line balanced debit and credit legs.",
+      "type": "object",
+      "properties": {
+        "journalNo": { "type": "string" },
+        "date": { "type": "string" },
+        "referenceNo": { "type": "string" },
+        "referenceType": { "type": "string" },
+        "narration": { "type": "string" },
+        "totalDebit": { "type": "number" },
+        "totalCredit": { "type": "number" },
+        "status": { "type": "string" },
+        "isSystemGenerated": { "type": "boolean" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["journalNo", "date", "totalDebit", "totalCredit", "status", "businessId"]
+    },
+    "CashBankTransaction": {
+      "title": "Cash and Bank Transaction",
+      "description": "Receipts, payments, contra transfers and bank reconciliation entries.",
+      "type": "object",
+      "properties": {
+        "voucherNo": { "type": "string" },
+        "voucherType": { "type": "string" },
+        "date": { "type": "string" },
+        "accountId": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["voucherNo", "voucherType", "date", "accountId", "amount", "businessId"]
+    },
+    "Customer": {
+      "title": "Customer Master",
+      "description": "Registered buyer/customer directory with currency and conversion rate setup.",
+      "type": "object",
+      "properties": {
+        "customerCode": { "type": "string" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "country": { "type": "string" },
+        "currency": { "type": "string" },
+        "conversionRate": { "type": "number" },
+        "conversionRateBDT": { "type": "number" },
+        "paymentTerms": { "type": "string" },
+        "deliveryTerms": { "type": "string" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["name", "businessId", "ownerId"]
+    },
+    "CurrencyMaster": {
+      "title": "Currency Master",
+      "description": "Global currency and exchange conversion rates to BDT.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "symbol": { "type": "string" },
+        "rateToBDT": { "type": "number" },
+        "isDefault": { "type": "boolean" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["code", "name", "rateToBDT", "businessId", "ownerId"]
+    },
+    "WorkOrder": {
+      "title": "Work Order / Sales Order",
+      "description": "Production and sales order booking records with foreign currency and BDT conversion.",
+      "type": "object",
+      "properties": {
+        "woNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "currencyCode": { "type": "string" },
+        "conversionRate": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "totalAmountBDT": { "type": "number" },
+        "status": { "type": "string" },
+        "businessId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["woNumber", "customerId", "customerName", "totalAmount", "businessId", "ownerId"]
+    },
+    "FixedAsset": {
+      "title": "Fixed Asset Record",
+      "description": "Fixed asset register with depreciation and disposal records.",
+      "type": "object",
+      "properties": {
+        "assetCode": { "type": "string" },
+        "assetName": { "type": "string" },
+        "assetCategory": { "type": "string" },
+        "purchaseDate": { "type": "string" },
+        "purchaseValue": { "type": "number" },
+        "usefulLifeYears": { "type": "number" },
+        "depreciationMethod": { "type": "string" },
+        "depreciationRate": { "type": "number" },
+        "accumulatedDepreciation": { "type": "number" },
+        "netBookValue": { "type": "number" },
+        "disposalStatus": { "type": "string" },
+        "businessId": { "type": "string" }
+      },
+      "required": ["assetCode", "assetName", "purchaseDate", "purchaseValue", "businessId"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "UserProfile",
+      "description": "User profiles and roles"
+    },
+    "/roles/{roleId}": {
+      "schema": "UserRolePermission",
+      "description": "Custom user roles and page permission settings"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Collection of item categories"
+    },
+    "/items/{itemId}": {
+      "schema": "Item",
+      "description": "Collection of inventory items"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Collection of stock movements"
+    },
+    "/formulas/{formulaId}": {
+      "schema": "ProductionFormula",
+      "description": "Collection of production calculation formulas"
+    },
+    "/suppliers/{supplierId}": {
+      "schema": "Supplier",
+      "description": "Collection of suppliers"
+    },
+    "/purchaseOrders/{poId}": {
+      "schema": "PurchaseOrder",
+      "description": "Collection of purchase orders"
+    },
+    "/supplierPayments/{paymentId}": {
+      "schema": "SupplierPayment",
+      "description": "Collection of supplier payments"
+    },
+    "/product_developments/{devId}": {
+      "schema": "ProductDevelopment",
+      "description": "Collection of product development UPS and costing calculation history"
+    },
+    "/customer_mrr_receipts/{id}": {
+      "schema": "CustomerMrrReceipt",
+      "description": "Collection of customer material receipt reports"
+    },
+    "/customer_bills/{id}": {
+      "schema": "CustomerBill",
+      "description": "Collection of customer finance bills and invoices"
+    },
+    "/purchase_requisitions/{id}": {
+      "schema": "PurchaseRequisition",
+      "description": "Collection of procurement purchase requisitions"
+    },
+    "/bank_facility_sanctions/{id}": {
+      "schema": "BankFacilitySanction",
+      "description": "Collection of bank facility limit and sanction master records"
+    },
+    "/bank_loans/{id}": {
+      "schema": "BankLoanRecord",
+      "description": "Collection of UPAS, LTR, Term loan, and OD records"
+    },
+    "/bank_loan_repayments/{id}": {
+      "schema": "LoanRepaymentRecord",
+      "description": "Collection of loan repayments and settlements"
+    },
+    "/bank_loan_gl_vouchers/{id}": {
+      "schema": "LoanGlVoucher",
+      "description": "Collection of double-entry GL journal vouchers"
+    },
+    "/challan_correction_requests/{id}": {
+      "schema": "ChallanCorrectionRequest",
+      "description": "Collection of challan correction and rectification requests"
+    },
+    "/subcontract_subcategories/{id}": {
+      "schema": "SubContractSubCategory",
+      "description": "Collection of subcontract process sub-categories"
+    },
+    "/subcontract_prices/{id}": {
+      "schema": "SubContractPrice",
+      "description": "Collection of subcontract supplier prices and rates"
+    },
+    "/company_masters/{id}": {
+      "schema": "CompanyMaster",
+      "description": "Collection of master company profiles"
+    },
+    "/bank_accounts/{id}": {
+      "schema": "BankAccountMaster",
+      "description": "Collection of commercial bank accounts"
+    },
+    "/coa_groups/{id}": {
+      "schema": "CoaGroup",
+      "description": "Chart of accounts master groups"
+    },
+    "/coa_categories/{id}": {
+      "schema": "CoaCategory",
+      "description": "Chart of accounts categories"
+    },
+    "/coa_subcategories/{id}": {
+      "schema": "CoaSubCategory",
+      "description": "Chart of accounts sub-categories"
+    },
+    "/coa_ledgers/{id}": {
+      "schema": "CoaLedger",
+      "description": "Chart of accounts ledger accounts"
+    },
+    "/journal_entries/{id}": {
+      "schema": "JournalEntry",
+      "description": "Double-entry journal vouchers"
+    },
+    "/cash_bank_transactions/{id}": {
+      "schema": "CashBankTransaction",
+      "description": "Cash and bank receipt, payment, and contra transactions"
+    },
+    "/fixed_assets/{id}": {
+      "schema": "FixedAsset",
+      "description": "Fixed asset register and depreciation records"
+    },
+    "/customers/{id}": {
+      "schema": "Customer",
+      "description": "Collection of customer and client master records"
+    },
+    "/currencies/{id}": {
+      "schema": "CurrencyMaster",
+      "description": "Collection of currency master exchange rates"
+    },
+    "/work_orders/{id}": {
+      "schema": "WorkOrder",
+      "description": "Collection of work orders and sales orders"
+    }
+  }
+}

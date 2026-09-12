@@ -1,0 +1,6 @@
+{
+  "name": "ES TRIMS LIMITED",
+  "description": "A comprehensive ERP system featuring a professional Accounts Module (Chart of Accounts, Journal Entry, Cash & Bank, Customer Receivable, Supplier Payable, Sales Accounts, Fixed Assets, Financial Reports, and Dashboard), Commercial Proforma Invoice (PI) Management, Bank Loan & Facilities, Subcontract, Production, Despatch, and Store Management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

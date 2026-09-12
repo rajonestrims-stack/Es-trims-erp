@@ -1,0 +1,479 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email.lower() in [
+          'rajonpaul300@gmail.com',
+          'esstore@gmail.com',
+          'rajon.estrims@gmail.com'
+        ]
+      );
+    }
+
+    // RBAC Lookup
+    function getUserProfile(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.ownerId == request.auth.uid;
+    }
+
+    // Master Gate (Business Membership)
+    function isBusinessMember(businessId) {
+      return isSignedIn() && (
+        isSuperAdmin() ||
+        businessId == 'default' ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          getUserProfile(request.auth.uid).businessId == businessId
+        )
+      );
+    }
+
+    function isEditor() {
+      return isSignedIn();
+    }
+
+    // --- Collection Routes ---
+
+    match /users/{uid} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /roles/{roleId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /userRoles/{roleId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /user_roles/{roleId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /approval_rules/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /employees/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /designations/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /departments/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /audit_logs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /auditLogs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /system_settings/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /categories/{categoryId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /salesCategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /sales_categories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /items/{itemId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /transactions/{transactionId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /formulas/{formulaId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /suppliers/{supplierId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /purchaseOrders/{poId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /purchase_orders/{poId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /supplierPayments/{paymentId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /supplier_payments/{paymentId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /approvalRequests/{requestId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /approval_requests/{requestId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /customers/{customerId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /buyers/{buyerId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /sections/{sectionId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /finished_goods/{fgId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /currencies/{currencyId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /price_masters/{priceId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /price_master/{priceId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /customer_bills/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /purchase_requisitions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /customer_orders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /salesOrders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /sales_orders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /work_orders/{woId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /sizes/{sizeId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /colors/{colorId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /product_developments/{devId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /production_processes/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /fg_categories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /fg_subcategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /production_executions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /production_transactions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /boms/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /production_requisitions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /delivery_challans/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /gate_passes/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /store_requisitions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /customer_mrr_receipts/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_facility_sanctions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /loanSanctions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /loan_sanctions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_loans/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_loan_records/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bankLoans/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_loan_repayments/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bankLoanRepayments/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_loan_gl_vouchers/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bankLoanGlVouchers/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_categories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractCategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_subcategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractSubcategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_items/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractItems/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_prices/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractPrices/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_price_master/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractPriceMaster/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_orders/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractOrders/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_pos/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractPOs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_issues/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractIssues/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_receives/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractReceives/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontract_audit_logs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /subcontractAuditLogs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /challan_correction_requests/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /company_masters/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /company_master/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /companies/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_masters/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_master/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_accounts/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /bank_account/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /pi_setup_config/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /pi_setup_configs/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /pi_setup/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /proforma_invoices/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /proformaInvoices/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /commercial_pi/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /coa_groups/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /coa_categories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /coa_subcategories/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /coa_ledgers/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /journal_entries/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /cash_bank_transactions/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /fixed_assets/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /posting_rules/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /postingRules/{id} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+/* Base Design System Enhancements */
+:root {
+  --erp-primary: #4f46e5;
+  --erp-primary-hover: #4338ca;
+  --erp-neutral-bg: #f8fafc;
+  --erp-card-border: rgba(226, 232, 240, 0.85);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Clean Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Unified ERP Interactive Focus States */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 6mm;
+  }
+
+  body.print-landscape {
+    @page {
+      size: A4 landscape;
+      margin: 8mm 6mm;
+    }
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    font-size: 12px;
+  }
+
+  /* Completely eliminate non-printable UI, navigation, sidebars, alerts, toasts, and buttons */
+  header,
+  nav,
+  aside,
+  footer,
+  button,
+  input[type="button"],
+  input[type="submit"],
+  .no-print,
+  .no-print *,
+  .no-print-bg,
+  .print\:hidden,
+  [data-no-print="true"],
+  .toast,
+  .sonner-toast,
+  [data-sonner-toaster],
+  [aria-live="polite"],
+  [role="tooltip"],
+  [role="status"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Reset layout containers and modal backdrops so they take zero extra height or offset */
+  #root,
+  #root > div,
+  main,
+  .fixed.inset-0,
+  [role="dialog"] {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    backdrop-filter: none !important;
+  }
+
+  .fixed.inset-0 > div,
+  [role="dialog"] > div {
+    max-height: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    background: #ffffff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* When an active print target or modal is active, hide everything outside the target document */
+  body[data-is-printing="true"] > *:not(#root),
+  body[data-is-printing="true"] #root > *:not(:has([data-print-target="true"])),
+  body[data-is-printing="true"] main:not(:has([data-print-target="true"])),
+  body[data-is-printing="true"] .fixed.inset-0:not(:has([data-print-target="true"])),
+  body[data-is-printing="true"] [role="dialog"]:not(:has([data-print-target="true"])) {
+    display: none !important;
+  }
+
+  /* Also hide background app when modal / printable-doc is present */
+  body:has([role="dialog"]) main:not(:has([role="dialog"])),
+  body:has([role="dialog"]) > #root > div > *:not(:has([role="dialog"])),
+  body:has(.printable-doc) main:not(:has(.printable-doc)),
+  body:has(.printable-doc) > #root > div > *:not(:has(.printable-doc)),
+  body:has([id^="printable-"]) main:not(:has([id^="printable-"])),
+  body:has([id^="printable-"]) > #root > div > *:not(:has([id^="printable-"])) {
+    display: none !important;
+  }
+
+  /* Printable Documents Base Container - fits standard A4 */
+  .printable-doc,
+  [id^="printable-"],
+  [data-print-target="true"],
+  .print-active-target {
+    display: block !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  /* Multi-page Table controls: header repeats on subsequent pages, rows never break awkwardly */
+  table {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  
+  thead {
+    display: table-header-group !important;
+  }
+  
+  tfoot {
+    display: table-footer-group !important;
+  }
+  
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .avoid-page-break,
+  .avoid-break,
+  .signature-block,
+  .doc-header,
+  .doc-footer {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
